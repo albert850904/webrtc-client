@@ -1,0 +1,19 @@
+@import "../../styles/variables";
+
+#rtc-home-container {
+  .rtc-actions-list {
+    list-style: none;
+    flex-direction: column;
+
+    > li {
+      margin: 0.5rem 2rem;
+      width: 40%;
+    }
+
+    > li > a {
+      font-size: 2em;
+      text-decoration: none;
+      color: $color-earth-word;
+    }
+  }
+}

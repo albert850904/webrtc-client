@@ -1,0 +1,57 @@
+#rtc-video-container {
+  .rtc-video-card {
+    margin: 2rem 5rem;
+
+    > video {
+      max-width: 100%;
+
+      .none {
+        filter: none;
+      }
+      .blur {
+        filter: blur(3px);
+      }
+      .grayscale {
+        filter: grayscale(1);
+      }
+      .invert {
+        filter: invert(1);
+      }
+      .contrast {
+        filter: contrast(200%);
+      }
+      .sepia {
+        filter: sepia(1);
+      }
+      .opacity {
+        filter: opacity(50%);
+      }
+      .saturate {
+        filter: saturate(200%);
+      }
+      .hue-rotate {
+        filter: hue-rotate(180deg);
+      }
+      .drop-shadow {
+        filter: drop-shadow(16px 16px 10px black);
+      }
+    }
+  }
+
+  .rtc-css-selector {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 0 10rem;
+  }
+
+  .screenshot {
+    display: flex;
+    justify-content: center;
+    margin-top: 5rem;
+    > div > img {
+      max-width: 30rem;
+      border-radius: 10px;
+    }
+  }
+}

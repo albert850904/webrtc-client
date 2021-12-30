@@ -1,0 +1,10 @@
+#rtc-p2p-container {
+  .rtc-video-card {
+    margin: 1rem;
+
+    > video {
+      max-width: 100%;
+      min-width: 100%;
+    }
+  }
+}

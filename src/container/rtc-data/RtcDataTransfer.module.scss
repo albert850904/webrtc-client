@@ -1,0 +1,13 @@
+@import "../../styles/variables";
+
+#rtc-data-transfer-container {
+  .rtc-data-transfer-container {
+    padding: 5rem 1rem;
+    &__block {
+      > label {
+        font-size: 28px;
+        color: $color-earth-word;
+      }
+    }
+  }
+}
