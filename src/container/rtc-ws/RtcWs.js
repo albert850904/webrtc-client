@@ -1,49 +1,72 @@
-import { useEffect, useState } from "react/cjs/react.development";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react/cjs/react.development";
 import Websocket from "socket.io-client";
 import { socketEvents } from "../../constants/socket-event";
 
 const RtcWs = () => {
+  const peerConnection = useRef();
+  const cacheStream = useRef();
   const [ws, setWs] = useState(null);
   const [isWsConnected, setIsWsConnected] = useState(false);
-  const [peerConnection, setPeerConnection] = useState();
-  const [cacheStream, setCacheStream] = useState();
 
-  const connection = () => {
+  // create connection and defining the event
+  const createPeerConnection = useCallback(async () => {
+    try {
+      const connection = new RTCPeerConnection({});
+      connection.onicecandidate = async (e) => {
+        ws.emit(socketEvents.ICE_CANDIDATE, e.candidate);
+      };
+      connection.ontrack = (e) => {
+        console.log("tracked: ", e.streams[0]);
+        const remoteVideo = document.getElementById("remoteVideo");
+        if (remoteVideo.srcObject !== e.streams[0]) {
+          console.log("remoteVideo", remoteVideo);
+          remoteVideo.srcObject = e.streams[0];
+        }
+      };
+      // add track 之後會觸發此event, 用來createOffer 通知remote peer
+      connection.onnegotiationneeded = async () => {
+        // const offer = await connection.createOffer({
+        //   offerToReceiveAudio: 1,
+        //   offerToReceiveVideo: 1,
+        // });
+        // await connection.setLocalDescription(offer);
+        // ws.emit(socketEvents.SDP_OFFER, connection.localDescription);
+      };
+      peerConnection.current = connection;
+    } catch (error) {
+      console.log(error);
+    }
+  }, [ws]);
+
+  const connect = async () => {
     if (!isWsConnected) {
       alert("please initialize connection first");
       return;
     }
-
     ws.emit(socketEvents.JOIN_ROOM, { username: "kairu1" });
-
-    ws.on(socketEvents.NEW_USER_JOIN, (data) => {
-      console.log("New User has joined the room");
-      console.log(data);
-    });
-
-    ws.on(socketEvents.USER_LEFT_ROOM, (data) => {
-      console.log("Someone has left the room");
-      console.log(data);
-    });
-
-    ws.on(socketEvents.DISCONNECTED, () => {
-      console.log("Server Disconnected");
-    });
-
-    ws.on(socketEvents.SDP_OFFER, handleSDPOffer);
-    ws.on(socketEvents.SDP_ANSWER, handleSDPAnswer);
-    ws.on(socketEvents.ICE_CANDIDATE, handleNewIceCandidate);
+    await initUserMediaAndTrack(); // 加入多媒體數據到RTCPeerConnection instance
   };
 
   const calling = async () => {
     try {
-      if (peerConnection) {
-        alert("Connection Checked!");
+      if (peerConnection.current) {
+        console.log("Connection Checked!");
       } else {
-        const connection = await createPeerConnection(); //建立 RTCPeerConnection
-        setPeerConnection(connection);
-        await initUserMediaAndTrack(connection); // 加入多媒體數據到RTCPeerConnection instance
+        console.log("create connection");
+        await createPeerConnection(); //建立 RTCPeerConnection
+        return;
       }
+      const offer = await peerConnection.current.createOffer({
+        offerToReceiveAudio: 1,
+        offerToReceiveVideo: 1,
+      });
+      await peerConnection.current.setLocalDescription(offer);
+      ws.emit(socketEvents.SDP_OFFER, peerConnection.current.localDescription);
     } catch (error) {
       console.log(`Error ${error.name}: ${error.message}`);
     }
@@ -74,40 +97,49 @@ const RtcWs = () => {
 
     // 4. cleanup： 關閉RTCPeerConnection連線並釋放記憶體
     peerConnection.close();
-    setPeerConnection(null);
-    setCacheStream(null);
+    peerConnection.current = null;
+    cacheStream.current = null;
   }
 
   // handling offer from remote user
-  const handleSDPOffer = async (desc) => {
-    console.log("receiving offer from signaling server");
-    if (!peerConnection) {
-      const connection = await createPeerConnection();
-      setPeerConnection(connection);
-    }
+  const handleSDPOffer = useCallback(
+    async (desc) => {
+      console.log("receiving offer from signaling server");
+      let _connection;
 
-    // 接收到remote offer 要設定為remote description
-    await peerConnection.setRemoteDescription(desc);
+      if (!peerConnection.current) {
+        createPeerConnection();
+        return;
+      } else {
+        _connection = peerConnection.current;
+      }
+      console.log("sdp offer", desc);
+      if (!desc) return;
+      // 接收到remote offer 要設定為remote description
+      await _connection.setRemoteDescription(desc);
 
-    // 還沒有stream, 要先getUserMedia + addTrack
-    if (!cacheStream) {
-      await initUserMediaAndTrack();
-    }
+      // 還沒有stream, 要先getUserMedia + addTrack
+      if (!cacheStream) {
+        console.log("init media cause no cache");
+        await initUserMediaAndTrack();
+      }
 
-    // create answer for remote user after receiving offers from remote user
-    try {
-      const answer = await peerConnection.createAnswer();
-      await peerConnection.setLocalDescription(answer);
-      ws.emit(socketEvents.SDP_ANSWER, answer);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+      // create answer for remote user after receiving offers from remote user
+      try {
+        const answer = await _connection.createAnswer();
+        await _connection.setLocalDescription(answer);
+        ws.emit(socketEvents.SDP_ANSWER, answer);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [createPeerConnection, ws]
+  );
 
   // fetch media stream and add it to connection tracks
-  const initUserMediaAndTrack = async (connection) => {
+  const initUserMediaAndTrack = async () => {
     let stream;
-    let _connection = peerConnection || connection;
+    let _connection = peerConnection.current;
 
     try {
       console.log("fetch local media stream");
@@ -121,7 +153,7 @@ const RtcWs = () => {
       });
       const localVideo = document.getElementById("localVideo");
       localVideo.srcObject = stream;
-      setCacheStream(stream);
+      cacheStream.current = stream;
     } catch (error) {
       console.log(error);
     }
@@ -131,59 +163,31 @@ const RtcWs = () => {
       stream
         .getTracks()
         .forEach((track) => _connection.addTrack(track, stream));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // create connection and defining the event
-  const createPeerConnection = async () => {
-    try {
-      const connection = new RTCPeerConnection({});
-      connection.onicecandidate = async (e) => {
-        ws.emit(socketEvents.ICE_CANDIDATE, e.candidate);
-      };
-      connection.ontrack = (e) => {
-        const remoteVideo = document.getElementById("remoteVideo");
-        if (remoteVideo.srcObject !== e.streams[0]) {
-          remoteVideo.srcObject = e.streams[0];
-        }
-      };
-      // add track 之後會觸發此event, 用來createOffer 通知remote peer
-      connection.onnegotiationneeded = async () => {
-        await connection.setLocalDescription(
-          await connection.createOffer({
-            offerToReceiveAudio: 1,
-            offerToReceiveVideo: 1,
-          })
-        );
-        ws.emit(socketEvents.SDP_OFFER, connection.localDescription);
-      };
-      return connection;
+      peerConnection.current = _connection;
     } catch (error) {
       console.log(error);
     }
   };
 
   // after receiving answer from remote peer, we should set it to remote
-  const handleSDPAnswer = async (desc) => {
+  const handleSDPAnswer = useCallback(async (desc) => {
     console.log("receive answer from remote through signaling server");
     try {
-      await peerConnection.setRemoteDescription(desc);
+      await peerConnection.current.setRemoteDescription(desc);
     } catch (error) {
       console.log(error);
     }
-  };
+  }, []);
 
   // listening to ice candidate and add after finding one
-  const handleNewIceCandidate = async (candidate) => {
+  const handleNewIceCandidate = useCallback(async (candidate) => {
     console.log("Joining new ICE Candidate", candidate);
     try {
-      await peerConnection.addIceCandidate(candidate);
+      await peerConnection.current.addIceCandidate(candidate);
     } catch (error) {
       console.log(error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const wsInstance = Websocket("http://localhost:1122");
@@ -192,12 +196,36 @@ const RtcWs = () => {
 
   useEffect(() => {
     if (ws) {
+      createPeerConnection();
       ws.on("connect", () => {
         console.log("ws server connected");
         setIsWsConnected(!!ws);
       });
+      ws.on(socketEvents.NEW_USER_JOIN, (data) => {
+        console.log("New User has joined the room");
+        console.log(data);
+      });
+
+      ws.on(socketEvents.USER_LEFT_ROOM, (data) => {
+        console.log("Someone has left the room");
+        console.log(data);
+      });
+
+      ws.on(socketEvents.DISCONNECTED, () => {
+        console.log("Server Disconnected");
+      });
+
+      // ws.on(socketEvents.SDP_ANSWER, handleSDPAnswer);
+      // ws.on(socketEvents.ICE_CANDIDATE, handleNewIceCandidate);
+      // ws.on(socketEvents.SDP_OFFER, handleSDPOffer);
     }
-  }, [ws]);
+  }, [
+    ws,
+    createPeerConnection,
+    handleSDPAnswer,
+    handleNewIceCandidate,
+    handleSDPOffer,
+  ]);
 
   return (
     <>
@@ -213,7 +241,7 @@ const RtcWs = () => {
         </section>
 
         <div className="box">
-          <button onClick={() => connection()}>Connection</button>
+          <button onClick={() => connect()}>Connection</button>
           <button onClick={() => calling()}>Call</button>
           <button onClick={() => closing()}>Hang Up</button>
         </div>
