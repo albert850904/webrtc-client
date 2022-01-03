@@ -1,4 +1,4 @@
-@import "../../styles/variables";
+@import '../../styles/variables';
 
 #rtc-home-container {
   .rtc-actions-list {
@@ -11,6 +11,8 @@
     }
 
     > li > a {
+      display: block;
+      width: 100%;
       font-size: 2em;
       text-decoration: none;
       color: $color-earth-word;

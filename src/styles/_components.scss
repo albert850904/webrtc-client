@@ -1,9 +1,12 @@
-@import "./variables";
+@import './variables';
 
 .webrtc-bg {
   background-color: $color-bg;
   min-height: 100vh;
   padding: 2rem 1rem;
+  > h1 {
+    margin-left: 1rem;
+  }
 }
 
 .webrtc-actions {
@@ -20,7 +23,7 @@
 .webrtc-title {
   display: flex;
   justify-content: center;
-  width: 100vw;
+  width: 100%;
   color: white;
 }
 
@@ -44,4 +47,49 @@
     background-color: $color-bg;
     box-shadow: 5px 5px 10px rgba(102, 102, 102, 0.5);
   }
+}
+
+.arrow {
+  display: block;
+  position: absolute;
+  width: 2vmin;
+  height: 2vmin;
+  background: transparent;
+  border-top: 0.5vmin solid white;
+  border-right: 0.5vmin solid white;
+  box-shadow: 0 0 0 lightgray;
+  transition: all 200ms ease;
+  margin: 1.5rem 1rem 0 1rem !important;
+
+  &.left {
+    left: 2rem;
+    transform: translate3d(0, -50%, 0) rotate(-135deg);
+  }
+
+  &.right {
+    right: 2rem;
+    transform: translate3d(0, -50%, 0) rotate(45deg);
+  }
+
+  &:hover {
+    border-color: $color-earth-bg;
+    box-shadow: 0.5vmin -0.5vmin 0 white;
+  }
+
+  &:before {
+    // for better hit area
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-40%, -60%) rotate(45deg);
+    width: 200%;
+    height: 200%;
+  }
+}
+
+.label {
+  font-size: 18px;
+  font-weight: 600;
+  color: $color-earth-bg;
 }

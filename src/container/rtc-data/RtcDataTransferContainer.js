@@ -1,24 +1,26 @@
-import { useCallback, useEffect, useState } from "react";
-import { LOCAL_USER, REMOTE_USER } from "../../constants/user";
-import styles from "./RtcDataTransfer.module.scss";
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LOCAL_USER, REMOTE_USER } from '../../constants/user';
+import styles from './RtcDataTransfer.module.scss';
 
 const RtcDataTransferContainer = () => {
+  const navigate = useNavigate();
   const [localConnection, setLocalConnection] = useState();
   const [remoteConnection, setRemoteConnection] = useState();
   const [channel, setChannel] = useState();
-  const [localMsg, setLocalMsg] = useState("");
-  const [remoteMsg, setRemoteMsg] = useState("");
+  const [localMsg, setLocalMsg] = useState('');
+  const [remoteMsg, setRemoteMsg] = useState('');
   const [isConnectionReady, setIsConnectionReady] = useState(false);
 
   const onChannelStageChange = useCallback((name, _channel) => {
     const readyState = _channel.readyState;
-    setIsConnectionReady(name === REMOTE_USER && readyState === "open");
+    setIsConnectionReady(name === REMOTE_USER && readyState === 'open');
     console.log(`${name} channel state is: ${readyState}`);
   }, []);
 
   const startConversationHandler = async () => {
     try {
-      const datachannel = localConnection.createDataChannel("local channel", {
+      const datachannel = localConnection.createDataChannel('local channel', {
         negotiated: false,
       });
       datachannel.onopen = onChannelStageChange(LOCAL_USER, datachannel);
@@ -57,7 +59,7 @@ const RtcDataTransferContainer = () => {
           try {
             await remoteUser.addIceCandidate(event.candidate);
           } catch (e) {
-            console.log("localuser error: ", e);
+            console.log('localuser error: ', e);
           }
         };
 
@@ -81,13 +83,16 @@ const RtcDataTransferContainer = () => {
   }, [onChannelStageChange]);
 
   return (
-    <div id={styles["rtc-data-transfer-container"]} className="webrtc-bg">
-      <h1>RTCDataChannel Demo</h1>
+    <div id={styles['rtc-data-transfer-container']} className="webrtc-bg">
+      <div className="webrtc-title">
+        <span className="arrow left" onClick={() => navigate(-1)}></span>
+        <h1>RTCDataChannel Demo</h1>
+      </div>
       <div
-        className={`row justify-content-between ${styles["rtc-data-transfer-container"]}`}
+        className={`row justify-content-between ${styles['rtc-data-transfer-container']}`}
       >
         <div
-          className={`col-12 col-md-6 ${styles["rtc-data-transfer-container__block"]}`}
+          className={`col-12 col-md-6 ${styles['rtc-data-transfer-container__block']}`}
         >
           <label htmlFor="dataChannelSend">Sender</label>
           <textarea
@@ -101,7 +106,7 @@ const RtcDataTransferContainer = () => {
           ></textarea>
         </div>
         <div
-          className={`col-12 col-md-6 ${styles["rtc-data-transfer-container__block"]}`}
+          className={`col-12 col-md-6 ${styles['rtc-data-transfer-container__block']}`}
         >
           <label htmlFor="dataChannelRecieve">Receiver</label>
           <textarea

@@ -1,21 +1,23 @@
-import React from "react";
-import { useWebRTC } from "../../utils/hooks/webrtc-hook";
-import styles from "./RtcVideo.module.scss";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useWebRTC } from '../../utils/hooks/webrtc-hook';
+import styles from './RtcVideo.module.scss';
 
 const IMAGE_FILTER_OPTIONS = [
-  { id: "none", name: "None" },
-  { id: "blur", name: "Blur" },
-  { id: "grayscale", name: "Grayscale" },
-  { id: "invert", name: "Invert" },
-  { id: "contrast", name: "Contrast" },
-  { id: "sepia", name: "Sepia" },
-  { id: "opacity", name: "Opacity 50%" },
-  { id: "saturate", name: "Saturate" },
-  { id: "hue-rotate", name: "Hue Rotate" },
-  { id: "drop-shadow", name: "Drop Shadow" },
+  { id: 'none', name: 'None' },
+  { id: 'blur', name: 'Blur' },
+  { id: 'grayscale', name: 'Grayscale' },
+  { id: 'invert', name: 'Invert' },
+  { id: 'contrast', name: 'Contrast' },
+  { id: 'sepia', name: 'Sepia' },
+  { id: 'opacity', name: 'Opacity 50%' },
+  { id: 'saturate', name: 'Saturate' },
+  { id: 'hue-rotate', name: 'Hue Rotate' },
+  { id: 'drop-shadow', name: 'Drop Shadow' },
 ];
 
 const RtcVideoContainer = (props) => {
+  const navigate = useNavigate();
   const {
     startStreamingHandler,
     stopMediaHandler,
@@ -28,11 +30,12 @@ const RtcVideoContainer = (props) => {
   const { capturedImage, selectedFilter } = rtcState;
 
   return (
-    <div id={styles["rtc-video-container"]} className="webrtc-bg">
+    <div id={styles['rtc-video-container']} className="webrtc-bg">
       <div className="webrtc-title">
+        <span className="arrow left" onClick={() => navigate(-1)}></span>
         <h1>Video</h1>
       </div>
-      <div className={`webrtc-card ${styles["rtc-video-card"]}`}>
+      <div className={`webrtc-card ${styles['rtc-video-card']}`}>
         <video
           autoPlay
           id="rtc-video"
@@ -63,7 +66,7 @@ const RtcVideoContainer = (props) => {
           Screenshot
         </button>
       </div>
-      <div className={styles["rtc-css-selector"]}>
+      <div className={styles['rtc-css-selector']}>
         <select
           id="filter"
           class="form-select form-select-sm"
@@ -76,8 +79,8 @@ const RtcVideoContainer = (props) => {
           ))}
         </select>
       </div>
-      <canvas id="rtc-canvas" style={{ display: "none" }}></canvas>
-      <div className={styles["screenshot"]}>
+      <canvas id="rtc-canvas" style={{ display: 'none' }}></canvas>
+      <div className={styles['screenshot']}>
         <div className="text-center">
           <h3 htmlFor="screenshotImg">Smile Mother Fucker : )</h3>
           <img id="screenshotImg" src={capturedImage} alt="" />

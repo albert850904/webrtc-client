@@ -1,0 +1,91 @@
+@import '../../styles/variables';
+
+#rtc-file-transfer {
+  .file-input {
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    > form > input {
+      display: none;
+    }
+
+    &__holder {
+      width: 50rem;
+      height: 20rem;
+      border: 2px dashed rgba(0, 0, 0, 0.3);
+      border-radius: 20px;
+      font-family: Arial;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 20px;
+      margin: auto;
+      color: rgba(0, 0, 0, 0.3);
+
+      &__file {
+        width: 10rem;
+        > img {
+          max-width: 100%;
+        }
+      }
+    }
+
+    &__holder-hover {
+      width: 50rem;
+      height: 20rem;
+      border: 2px dashed;
+      border-radius: 20px;
+      font-family: Arial;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      line-height: 180px;
+      font-size: 20px;
+      margin: auto;
+      color: rgba(0, 0, 0, 0.3);
+      border-color: $color-bg;
+      transform: scale(1.05, 1.05);
+      background-color: $color-earth-word;
+    }
+  }
+
+  .progress {
+    padding: 2rem;
+    &__send {
+      margin-bottom: 1rem;
+      > progress {
+        width: 100%;
+      }
+    }
+    &__receive {
+      > progress {
+        width: 100%;
+      }
+    }
+  }
+
+  .meta-info {
+    padding: 2rem;
+    &__text {
+      margin-bottom: 1rem;
+    }
+    &__btn {
+      text-decoration: none;
+      background: #0d6efd;
+      color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      display: block;
+      width: fit-content;
+      transition: all 0.2s ease-in-out;
+      &:hover {
+        transform: translateY(3px);
+        opacity: 0.8;
+      }
+    }
+  }
+}

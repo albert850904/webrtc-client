@@ -5,9 +5,12 @@ import {
   useRef,
 } from 'react/cjs/react.development';
 import Websocket from 'socket.io-client';
+import { useNavigate } from 'react-router-dom';
 import { socketEvents } from '../../constants/socket-event';
+import styles from './RtcWs.module.scss';
 
 const RtcWs = () => {
+  const navigate = useNavigate();
   const peerConnection = useRef();
   const cacheStream = useRef();
   const [ws, setWs] = useState(null);
@@ -230,25 +233,37 @@ const RtcWs = () => {
   ]);
 
   return (
-    <>
-      <h1>Video Chat With WebRTC</h1>
-      <div id="container">
-        <section>
-          <h1>Local Tracker</h1>
-          <video id="localVideo" autoPlay></video>
-        </section>
-        <section>
-          <h1>Remote Receiver</h1>
-          <video id="remoteVideo" autoPlay></video>
-        </section>
-
-        <div className="box">
-          <button onClick={() => connect()}>Connection</button>
-          <button onClick={() => calling()}>Call</button>
-          <button onClick={() => closing()}>Hang Up</button>
+    <div id={styles['rtc-ws-container']} className="webrtc-bg">
+      <div className="webrtc-title d-flex">
+        <span className="arrow left" onClick={() => navigate(-1)}></span>
+        <h1>Video Chat With WebRTC</h1>
+      </div>
+      <div className="row justify-content-between">
+        <div className="col-12 col-md-6">
+          <div className={`webrtc-card ${styles['rtc-video-card']}`}>
+            <h1>Local Tracker</h1>
+            <video id="localVideo" autoPlay></video>
+          </div>
+        </div>
+        <div className="col-12 col-md-6">
+          <div className={`webrtc-card ${styles['rtc-video-card']}`}>
+            <h1>Remote Receiver</h1>
+            <video id="remoteVideo" autoPlay></video>
+          </div>
         </div>
       </div>
-    </>
+      <div className="webrtc-actions">
+        <button className="btn btn-success" onClick={() => connect()}>
+          Connection
+        </button>
+        <button className="btn btn-warning" onClick={() => calling()}>
+          Call
+        </button>
+        <button className="btn btn-danger" onClick={() => closing()}>
+          Hang Up
+        </button>
+      </div>
+    </div>
   );
 };
 

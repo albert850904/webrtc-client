@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState } from "react/cjs/react.development";
-import styles from "./RtcVideo.module.scss";
+import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react/cjs/react.development';
+import styles from './RtcVideo.module.scss';
 
 const RtcP2pContainer = () => {
+  const navigate = useNavigate();
   const [isCalling, setIsCalling] = useState(false);
   const [localPeer, setLocalPeer] = useState();
   const [remotePeer, setRemotePeer] = useState();
@@ -30,22 +32,22 @@ const RtcP2pContainer = () => {
       try {
         await _receiverConnection.addIceCandidate(e.candidate);
       } catch (error) {
-        console.log("caller error: ", error);
+        console.log('caller error: ', error);
       }
     };
     _callerConnection.oniceconnectionstatechange = (e) => {
-      console.log("caller state change ", e);
+      console.log('caller state change ', e);
     };
 
     _receiverConnection.onicecandidate = async (e) => {
       try {
         await _callerConnection.addIceCandidate(e.candidate);
       } catch (error) {
-        console.log("receiver error: ", error);
+        console.log('receiver error: ', error);
       }
     };
     _receiverConnection.oniceconnectionstatechange = (e) => {
-      console.log("receiver state change ", e);
+      console.log('receiver state change ', e);
     };
 
     _receiverConnection.ontrack = (e) => {
@@ -67,14 +69,14 @@ const RtcP2pContainer = () => {
     async (desc) => {
       try {
         await receiverConnection.setLocalDescription(desc);
-        console.log("receiver set local desc complete");
+        console.log('receiver set local desc complete');
       } catch (e) {
         console.log(`Failed to set session description: ${e.toString()}`);
       }
 
       try {
         await callerConnection.setRemoteDescription(desc);
-        console.log("caller set remote desc complete");
+        console.log('caller set remote desc complete');
       } catch (e) {
         console.log(`Failed to set session description: ${e.toString()}`);
       }
@@ -86,14 +88,14 @@ const RtcP2pContainer = () => {
     async (desc) => {
       try {
         await callerConnection.setLocalDescription(desc);
-        console.log("caller set local desc complete");
+        console.log('caller set local desc complete');
       } catch (e) {
         console.log(`Failed to set session description: ${e.toString()}`);
       }
 
       try {
         await receiverConnection.setRemoteDescription(desc);
-        console.log("receiver set remote desc complete");
+        console.log('receiver set remote desc complete');
       } catch (e) {
         console.log(`Failed to set session description: ${e.toString()}`);
       }
@@ -117,8 +119,8 @@ const RtcP2pContainer = () => {
   };
 
   useEffect(() => {
-    setLocalPeer(document.getElementById("localVideo"));
-    setRemotePeer(document.getElementById("remoteVideo"));
+    setLocalPeer(document.getElementById('localVideo'));
+    setRemotePeer(document.getElementById('remoteVideo'));
   }, []);
 
   useEffect(() => {
@@ -138,17 +140,20 @@ const RtcP2pContainer = () => {
   }, [isCalling, callerConnection, receiverConnection, onCreateOfferSuccess]);
 
   return (
-    <div id={styles["rtc-p2p-container"]} className="webrtc-bg">
-      <h1>Calling With WebRTC</h1>
+    <div id={styles['rtc-p2p-container']} className="webrtc-bg">
+      <div className="d-flex webrtc-title">
+        <span className="arrow left" onClick={() => navigate(-1)}></span>
+        <h1>Calling With WebRTC</h1>
+      </div>
       <div className="row justify-content-between">
         <div className="col-12 col-md-6">
-          <div className={`webrtc-card ${styles["rtc-video-card"]}`}>
+          <div className={`webrtc-card ${styles['rtc-video-card']}`}>
             <h3>P1 Caller</h3>
             <video id="localVideo" autoPlay muted></video>
           </div>
         </div>
         <div className="col-12 col-md-6">
-          <div className={`webrtc-card ${styles["rtc-video-card"]}`}>
+          <div className={`webrtc-card ${styles['rtc-video-card']}`}>
             <h3>P2 Receiver</h3>
             <video id="remoteVideo" autoPlay></video>
           </div>
