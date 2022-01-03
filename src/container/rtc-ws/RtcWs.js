@@ -3,9 +3,9 @@ import {
   useState,
   useCallback,
   useRef,
-} from "react/cjs/react.development";
-import Websocket from "socket.io-client";
-import { socketEvents } from "../../constants/socket-event";
+} from 'react/cjs/react.development';
+import Websocket from 'socket.io-client';
+import { socketEvents } from '../../constants/socket-event';
 
 const RtcWs = () => {
   const peerConnection = useRef();
@@ -17,19 +17,20 @@ const RtcWs = () => {
   const createPeerConnection = useCallback(async () => {
     try {
       const connection = new RTCPeerConnection({});
-      connection.onicecandidate = async (e) => {
+      connection.onicecandidate = (e) => {
         ws.emit(socketEvents.ICE_CANDIDATE, e.candidate);
       };
       connection.ontrack = (e) => {
-        console.log("tracked: ", e.streams[0]);
-        const remoteVideo = document.getElementById("remoteVideo");
+        console.log('tracked: ', e.streams[0]);
+        const remoteVideo = document.getElementById('remoteVideo');
         if (remoteVideo.srcObject !== e.streams[0]) {
-          console.log("remoteVideo", remoteVideo);
+          console.log('remoteVideo', remoteVideo);
           remoteVideo.srcObject = e.streams[0];
         }
       };
       // add track 之後會觸發此event, 用來createOffer 通知remote peer
       connection.onnegotiationneeded = async () => {
+        console.log('negotaited');
         // const offer = await connection.createOffer({
         //   offerToReceiveAudio: 1,
         //   offerToReceiveVideo: 1,
@@ -45,19 +46,19 @@ const RtcWs = () => {
 
   const connect = async () => {
     if (!isWsConnected) {
-      alert("please initialize connection first");
+      alert('please initialize connection first');
       return;
     }
-    ws.emit(socketEvents.JOIN_ROOM, { username: "kairu1" });
-    await initUserMediaAndTrack(); // 加入多媒體數據到RTCPeerConnection instance
+    ws.emit(socketEvents.JOIN_ROOM, { username: 'kairu1' });
+    // await initUserMediaAndTrack(); // 加入多媒體數據到RTCPeerConnection instance
   };
 
   const calling = async () => {
     try {
       if (peerConnection.current) {
-        console.log("Connection Checked!");
+        console.log('Connection Checked!');
       } else {
-        console.log("create connection");
+        console.log('create connection');
         await createPeerConnection(); //建立 RTCPeerConnection
         return;
       }
@@ -73,21 +74,22 @@ const RtcWs = () => {
   };
 
   function closing() {
-    console.log("Closing connection call");
-    if (!peerConnection) return; // 防呆機制
+    console.log('Closing connection call');
+    const _connection = peerConnection.current;
+    if (!_connection) return; // 防呆機制
 
     // 1. 移除事件監聽
-    peerConnection.ontrack = null;
-    peerConnection.onicecandidate = null;
-    peerConnection.onnegotiationneeded = null;
+    _connection.ontrack = null;
+    _connection.onicecandidate = null;
+    _connection.onnegotiationneeded = null;
 
     // 2. 停止所有在connection中的多媒體信息
-    peerConnection.getSenders().forEach((sender) => {
-      peerConnection.removeTrack(sender);
+    _connection.getSenders().forEach((sender) => {
+      _connection.removeTrack(sender);
     });
 
     // 3. 暫停video播放，並將儲存在src裡的 MediaStreamTracks 依序停止
-    const localVideo = document.getElementById("localVideo");
+    const localVideo = document.getElementById('localVideo');
     if (localVideo.srcObject) {
       localVideo.pause();
       localVideo.srcObject.getTracks().forEach((track) => {
@@ -96,31 +98,31 @@ const RtcWs = () => {
     }
 
     // 4. cleanup： 關閉RTCPeerConnection連線並釋放記憶體
-    peerConnection.close();
-    peerConnection.current = null;
+    _connection.close();
+    _connection.current = null;
     cacheStream.current = null;
   }
 
   // handling offer from remote user
   const handleSDPOffer = useCallback(
     async (desc) => {
-      console.log("receiving offer from signaling server");
+      console.log('receiving offer from signaling server');
       let _connection;
 
       if (!peerConnection.current) {
-        createPeerConnection();
+        await createPeerConnection();
         return;
       } else {
         _connection = peerConnection.current;
       }
-      console.log("sdp offer", desc);
+      console.log('sdp offer', desc);
       if (!desc) return;
       // 接收到remote offer 要設定為remote description
       await _connection.setRemoteDescription(desc);
 
       // 還沒有stream, 要先getUserMedia + addTrack
       if (!cacheStream) {
-        console.log("init media cause no cache");
+        console.log('init media cause no cache');
         await initUserMediaAndTrack();
       }
 
@@ -142,7 +144,7 @@ const RtcWs = () => {
     let _connection = peerConnection.current;
 
     try {
-      console.log("fetch local media stream");
+      console.log('fetch local media stream');
       stream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
@@ -151,7 +153,7 @@ const RtcWs = () => {
           },
         },
       });
-      const localVideo = document.getElementById("localVideo");
+      const localVideo = document.getElementById('localVideo');
       localVideo.srcObject = stream;
       cacheStream.current = stream;
     } catch (error) {
@@ -171,7 +173,7 @@ const RtcWs = () => {
 
   // after receiving answer from remote peer, we should set it to remote
   const handleSDPAnswer = useCallback(async (desc) => {
-    console.log("receive answer from remote through signaling server");
+    console.log('receive answer from remote through signaling server');
     try {
       await peerConnection.current.setRemoteDescription(desc);
     } catch (error) {
@@ -181,7 +183,7 @@ const RtcWs = () => {
 
   // listening to ice candidate and add after finding one
   const handleNewIceCandidate = useCallback(async (candidate) => {
-    console.log("Joining new ICE Candidate", candidate);
+    console.log('Joining new ICE Candidate', candidate);
     try {
       await peerConnection.current.addIceCandidate(candidate);
     } catch (error) {
@@ -190,34 +192,34 @@ const RtcWs = () => {
   }, []);
 
   useEffect(() => {
-    const wsInstance = Websocket("http://localhost:1122");
+    const wsInstance = Websocket('http://localhost:1122');
     if (wsInstance) setWs(wsInstance);
   }, []);
 
   useEffect(() => {
     if (ws) {
-      createPeerConnection();
-      ws.on("connect", () => {
-        console.log("ws server connected");
+      (async () => await createPeerConnection())();
+      ws.on('connect', () => {
+        console.log('ws server connected');
         setIsWsConnected(!!ws);
       });
       ws.on(socketEvents.NEW_USER_JOIN, (data) => {
-        console.log("New User has joined the room");
+        console.log('New User has joined the room');
         console.log(data);
       });
 
       ws.on(socketEvents.USER_LEFT_ROOM, (data) => {
-        console.log("Someone has left the room");
+        console.log('Someone has left the room');
         console.log(data);
       });
 
       ws.on(socketEvents.DISCONNECTED, () => {
-        console.log("Server Disconnected");
+        console.log('Server Disconnected');
       });
 
-      // ws.on(socketEvents.SDP_ANSWER, handleSDPAnswer);
-      // ws.on(socketEvents.ICE_CANDIDATE, handleNewIceCandidate);
-      // ws.on(socketEvents.SDP_OFFER, handleSDPOffer);
+      ws.on(socketEvents.SDP_ANSWER, handleSDPAnswer);
+      ws.on(socketEvents.ICE_CANDIDATE, handleNewIceCandidate);
+      ws.on(socketEvents.SDP_OFFER, handleSDPOffer);
     }
   }, [
     ws,
