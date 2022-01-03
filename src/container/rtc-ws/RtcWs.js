@@ -53,7 +53,7 @@ const RtcWs = () => {
       return;
     }
     ws.emit(socketEvents.JOIN_ROOM, { username: 'kairu1' });
-    // await initUserMediaAndTrack(); // 加入多媒體數據到RTCPeerConnection instance
+    await initUserMediaAndTrack(); // 加入多媒體數據到RTCPeerConnection instance
   };
 
   const calling = async () => {
