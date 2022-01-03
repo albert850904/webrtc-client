@@ -1,10 +1,9 @@
-import { useCallback, useReducer } from "react";
-import { useEffect, useState } from "react/cjs/react.development";
+import { useEffect, useState, useCallback, useReducer } from 'react';
 
-export const SET_VIDEO_INSTANCE = "SET_VEDIO_INSTANCE";
-export const SET_CANVAS_INSTANCE = "SET_CANVAS_INSTANCE";
-export const SET_CAPTURED_IMG = "SET_CAPTURED_IMG";
-export const SET_IMAGE_FILTER = "SET_IMAGE_FILTER";
+export const SET_VIDEO_INSTANCE = 'SET_VEDIO_INSTANCE';
+export const SET_CANVAS_INSTANCE = 'SET_CANVAS_INSTANCE';
+export const SET_CAPTURED_IMG = 'SET_CAPTURED_IMG';
+export const SET_IMAGE_FILTER = 'SET_IMAGE_FILTER';
 
 const DEFAULT_CONSTRAINTS = {
   audio: false,
@@ -64,7 +63,7 @@ export const useWebRTC = () => {
   const { video, canvas } = rtcState;
 
   const fetchCorespondingGetMediaFunction = (_constraints) => {
-    if ("mediaDevices" in navigator) {
+    if ('mediaDevices' in navigator) {
       return navigator.mediaDevices.getUserMedia(_constraints);
     }
 
@@ -78,7 +77,7 @@ export const useWebRTC = () => {
       // 不支援的情況下
       if (!getUserMedia) {
         return Promise.reject(
-          new Error("getUserMedia is not implemented in this browser")
+          new Error('getUserMedia is not implemented in this browser')
         );
       }
 
@@ -101,7 +100,7 @@ export const useWebRTC = () => {
     (stream) => {
       window.stream = stream;
 
-      if ("srcObject" in video) {
+      if ('srcObject' in video) {
         video.srcObject = stream;
       } else {
         // 舊瀏覽器沒有srcObject，所以要先建構objectUrl 再塞給src
@@ -112,7 +111,7 @@ export const useWebRTC = () => {
   );
 
   const errorCallback = useCallback((error) => {
-    console.log("getStreamService error: ", error);
+    console.log('getStreamService error: ', error);
   }, []);
 
   const startStreamingHandler = useCallback(() => {
@@ -122,7 +121,7 @@ export const useWebRTC = () => {
           DEFAULT_CONSTRAINTS
         );
         if (mediaGet) successCallback(mediaGet);
-        else throw new Error("fetch error");
+        else throw new Error('fetch error');
       } catch (error) {
         errorCallback(error);
       }
@@ -139,10 +138,10 @@ export const useWebRTC = () => {
   const screenshotHandler = useCallback(() => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
     dispatch({
       type: SET_CAPTURED_IMG,
-      value: canvas.toDataURL("image/png"),
+      value: canvas.toDataURL('image/png'),
     });
   }, [canvas, video]);
 
@@ -153,11 +152,11 @@ export const useWebRTC = () => {
   useEffect(() => {
     dispatch({
       type: SET_VIDEO_INSTANCE,
-      value: document.getElementById("rtc-video"),
+      value: document.getElementById('rtc-video'),
     });
     dispatch({
       type: SET_CANVAS_INSTANCE,
-      value: document.getElementById("rtc-canvas"),
+      value: document.getElementById('rtc-canvas'),
     });
   }, []);
 

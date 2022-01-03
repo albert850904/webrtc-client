@@ -1,5 +1,5 @@
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCallback, useEffect, useState } from 'react/cjs/react.development';
 import styles from './RtcVideo.module.scss';
 
 const RtcP2pContainer = () => {

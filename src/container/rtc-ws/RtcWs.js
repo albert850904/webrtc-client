@@ -1,9 +1,4 @@
-import {
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-} from 'react/cjs/react.development';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Websocket from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
 import { socketEvents } from '../../constants/socket-event';
