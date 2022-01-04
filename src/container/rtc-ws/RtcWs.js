@@ -190,7 +190,7 @@ const RtcWs = () => {
   }, []);
 
   useEffect(() => {
-    const wsInstance = Websocket('http://localhost:1122');
+    const wsInstance = Websocket('https://kairu-cheng.site/');
     if (wsInstance) setWs(wsInstance);
   }, []);
 
