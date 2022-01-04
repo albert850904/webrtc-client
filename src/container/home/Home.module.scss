@@ -16,6 +16,10 @@
       font-size: 2em;
       text-decoration: none;
       color: $color-earth-word;
+      word-break: break-all;
+      @media screen and (max-width: 720px) {
+        font-size: 1em;
+      }
     }
   }
 }

@@ -13,6 +13,7 @@
 
     &__holder {
       width: 50rem;
+      max-width: 100%;
       height: 20rem;
       border: 2px dashed rgba(0, 0, 0, 0.3);
       border-radius: 20px;
@@ -35,6 +36,7 @@
 
     &__holder-hover {
       width: 50rem;
+      max-width: 100%;
       height: 20rem;
       border: 2px dashed;
       border-radius: 20px;
@@ -70,6 +72,10 @@
 
   .meta-info {
     padding: 2rem;
+    > p {
+      font-size: 2em;
+      font-weight: 600;
+    }
     &__text {
       margin-bottom: 1rem;
     }

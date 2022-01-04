@@ -20,6 +20,7 @@ const RtcFileTransferContainer = () => {
   const [localChannel, setLocalChannel] = useState();
   const [remoteChannel, setRemoteChannel] = useState();
   const [sendProgress, setSendProgress] = useState(0);
+  const [isSendSuccess, setIsSendSuccess] = useState(false);
 
   /**
    * recording sender stage change
@@ -101,6 +102,7 @@ const RtcFileTransferContainer = () => {
         anchorRef.current.href = URL.createObjectURL(received);
         anchorRef.current.download = selectedFile.name;
         anchorRef.current.textContent = `Click to download '${selectedFile.name}' (${selectedFile.size} bytes)`;
+        setIsSendSuccess(true);
         closeDataChannels();
       }
     },
@@ -275,7 +277,10 @@ const RtcFileTransferContainer = () => {
       </div>
       <div className={`webrtc-card ${styles['meta-info']}`}>
         <div ref={byteRef} className={`${styles['meta-info__text']}`}></div>
-        <a ref={anchorRef} className={`${styles['meta-info__btn']}`}></a>
+        {!isSendSuccess && <p>Please Send me a File</p>}
+        {isSendSuccess && (
+          <a ref={anchorRef} className={`${styles['meta-info__btn']}`}></a>
+        )}
         <span id="status"></span>
       </div>
     </div>
