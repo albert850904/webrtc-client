@@ -16,7 +16,9 @@ const RtcWs = () => {
     try {
       const connection = new RTCPeerConnection({
         iceServers: [
-          { url: 'stun:18.118.187.114:3478' },
+          {
+            urls: 'stun:18.118.187.114:3478',
+          },
           {
             urls: 'turn:18.118.187.114:3478',
             username: 'kairu',
@@ -25,25 +27,34 @@ const RtcWs = () => {
         ],
       });
       connection.onicecandidate = (e) => {
-        ws.emit(socketEvents.ICE_CANDIDATE, e.candidate);
+        // The SDP will only contain the candidates that have been gathered up to that point in time, so unless you wait for the null candidate in the pc.onicecandidate callback, you wont get all candidates this way
+        if (e.candidate === null) {
+          ws.emit(socketEvents.ICE_CANDIDATE, e.candidate);
+        }
       };
       connection.ontrack = (e) => {
-        console.log('tracked: ', e.streams[0]);
+        console.log('tracked: ', e.streams);
         const remoteVideo = document.getElementById('remoteVideo');
-        if (remoteVideo.srcObject !== e.streams[0]) {
+        if (remoteVideo.srcObject !== e.streams[0] && e.streams[0]) {
           console.log('remoteVideo', remoteVideo);
           remoteVideo.srcObject = e.streams[0];
+        }
+      };
+      connection.onconnectionstatechange = async () => {
+        // restartIce 會觸發onnegotiationneeded 再進行一次輪詢
+        if (connection.connectionState === 'failed') {
+          connection.restartIce();
         }
       };
       // add track 之後會觸發此event, 用來createOffer 通知remote peer
       connection.onnegotiationneeded = async () => {
         console.log('negotaited');
-        // const offer = await connection.createOffer({
-        //   offerToReceiveAudio: 1,
-        //   offerToReceiveVideo: 1,
-        // });
-        // await connection.setLocalDescription(offer);
-        // ws.emit(socketEvents.SDP_OFFER, connection.localDescription);
+        const offer = await connection.createOffer({
+          offerToReceiveAudio: 1,
+          offerToReceiveVideo: 1,
+        });
+        await connection.setLocalDescription(offer);
+        ws.emit(socketEvents.SDP_OFFER, connection.localDescription);
       };
       peerConnection.current = connection;
     } catch (error) {
