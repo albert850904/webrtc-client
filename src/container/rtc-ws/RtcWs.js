@@ -16,6 +16,7 @@ const RtcWs = () => {
     try {
       const connection = new RTCPeerConnection({
         iceServers: [
+          { url: 'stun:18.118.187.114:3478' },
           {
             urls: 'turn:18.118.187.114:3478',
             username: 'kairu',
