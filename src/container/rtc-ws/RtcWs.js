@@ -14,7 +14,15 @@ const RtcWs = () => {
   // create connection and defining the event
   const createPeerConnection = useCallback(async () => {
     try {
-      const connection = new RTCPeerConnection({});
+      const connection = new RTCPeerConnection({
+        iceServers: [
+          {
+            urls: 'turn:18.118.187.114:3478',
+            username: 'kairu',
+            credential: 'albert850904',
+          },
+        ],
+      });
       connection.onicecandidate = (e) => {
         ws.emit(socketEvents.ICE_CANDIDATE, e.candidate);
       };
@@ -182,6 +190,7 @@ const RtcWs = () => {
   // listening to ice candidate and add after finding one
   const handleNewIceCandidate = useCallback(async (candidate) => {
     console.log('Joining new ICE Candidate', candidate);
+    console.log(peerConnection.current);
     try {
       await peerConnection.current.addIceCandidate(candidate);
     } catch (error) {
@@ -191,6 +200,7 @@ const RtcWs = () => {
 
   useEffect(() => {
     const wsInstance = Websocket('https://kairu-cheng.site/');
+    // const wsInstance = Websocket('http://localhost:1122/');
     if (wsInstance) setWs(wsInstance);
   }, []);
 
